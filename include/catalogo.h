@@ -54,21 +54,47 @@ private:
     int capacidade_t;    // capacidade maxima alocada no vetor do modo t antes de redimensionar
 
     // --- atributos exclusivos do modo L ---
-    node_l** cabeca_linhas;  // vetor de ponteiros para o primeiro elemento de cada linha (item)
-    node_l** cabeca_colunas; // vetor de ponteiros para o primeiro elemento de cada coluna (atributo)
+    node_l** cabeca_linhas;  // vetor de ponteiros para o primeiro elemento / cabeca de cada linha (item)
+    node_l** cabeca_colunas; // vetor de ponteiros para o primeiro elemento / cabeca de cada coluna (atributo)
 
     // --- metodos privados auxiliares do modo t ---
 
-    // verifica se a tripleta 1 deve vir antes da tripleta 2 na ordem do vetor
+    /*
+    Verifica se a celula 1 deve ser ordenada antes da celula 2 no vetor contiguo.
+    O vetor do Modo T precisa estar ordenado primeiro por linhas(itens) e depois por colunas (atributos)
+    a funcao vem_antes_t é a forma/comparacao padronizada de saber qual celula vem primeiro
+
+    retorna TRUE se a celula 1 vem antes e FALSE se a celula 2 deve vir antes.
+    */
     bool vem_antes_t(int item1, int atrib1, int item2, int atrib2) const;
 
-    // faz busca binaria no vetor ordenado e retorna a posicao da tripleta ou onde ela deveria ser inserida
+    /*
+    int buscar_posicao_t(id_item, id_atributo)
+
+    Faz uma busca binaria no vetor contiguo de tripletas.
+    Rretorna o indice exato caso a tripleta exista.
+    Caso nao exista, retorna a posicao onde ela deve ser inserida para manter a ordem.
+    */
     int buscar_posicao_t(int id_item, int id_atributo) const;
 
-    // dobras a capacidade do vetor de tripletas quando ele fica cheio
+    /*
+    dobra o espaco de memoria do vetor dinamico elementos_t.
+    o vetor no modo_t tem um limite maximo definido por capacidade_t, quando ele fica cheio
+    (tamanho_t == capacidade_t), o programa precisa de mais espaço.
+    a funcao redimensionar_t() cria um novo vetor com o dobro do espaço e copia todos os modificadores(nós)
+    do vetor antigo para o novo
+    */
     void redimensionar_t();
 
-    // insere, altera ou remove um modificador dentro do vetor do modo t
+    /*
+    essa funcao gerencia a insercao, atualizacao ou remocao de um modificador no vetor contiguo do modo_T
+    
+    1 - Utiliza a busca binária(buscar_posicao_t) para encontrar o indice alvo
+    2 - Se o nó ja existir o valor é atualizado
+    2.1 - Caso o valor seja 0, o nó é removido
+    2.2 - Se não existir(e o valor for diferente de 0), o nó (modificador) é criado com os elementos
+            posteriores sendo empurrados para trás
+    */
     void definir_modificador_t(int id_item, int id_atributo, int valor);
 
     // busca e retorna o valor de um modificador no modo t (retorna 0 se nao existir)
@@ -98,7 +124,7 @@ private:
 
 public:
     // construtor: inicia o catalogo no modo informado (padrao modo l)
-    catalogo(modomatriz modo_inicial = modo_l);
+    catalogo(bool modo_inicial = 1);
 
     // destrutor: libera toda a memoria alocada do modo ativo
     ~catalogo();
@@ -107,7 +133,7 @@ public:
     void redimensionar_dimensoes(int novos_itens, int novos_atributos);
 
     // altera o modo de armazenamento atual (l para t ou t para l) sem perder dados (comando e)
-    void alternar_modo(modomatriz novo_modo);
+    void alternar_modo(bool novo_modo);
 
     // insere, altera ou remove um modificador na matriz (comando m)
     void definir_modificador(int id_item, int id_atributo, int valor);
@@ -128,7 +154,7 @@ public:
     int somar_modificadores_item(int id_item) const;
 
     // retorna o modo de armazenamento ativo no momento
-    modomatriz get_modo_atual() const;
+    bool get_modo_atual() const;
 };
 
 #endif
