@@ -127,147 +127,6 @@ essa funcao gerencia a insercao, atualizacao ou remocao de um modificador no vet
 */
 void catalogo::definir_modificador_t(int id_item, int id_atributo, int valor){
     
-    int posicao = catalogo::buscar_posicao_t(id_item, id_atributo);
-
-    // checagem segura para confirmar se a celula exata ja existe
-    if (posicao < catalogo::tamanho_t && 
-        catalogo::elementos_t[posicao].id_item == id_item && 
-        catalogo::elementos_t[posicao].id_atributo == id_atributo) {
-        
-        if (valor != 0) {
-            // atualiza o valor
-            catalogo::elementos_t[posicao].valor = valor;
-        } else {
-            // valor == 0 o nó deve ser removido e os posteriores puxados para frente
-            for (int i = posicao; i < catalogo::tamanho_t - 1; i++) {
-                catalogo::elementos_t[i] = catalogo::elementos_t[i + 1];
-            }
-            catalogo::tamanho_t--;
-        }
-    } 
-    // se o elemento nao existir e valor != 0
-    else if (valor != 0) {
-        
-        // checa e resolve limites fisicos de memoria antes de inserir
-        catalogo::redimensionar_t();
-    
-        // empurra os elementos para tras abrindo espaco na posicao alvo
-        for (int i = catalogo::tamanho_t; i > posicao; i--) {
-            catalogo::elementos_t[i] = catalogo::elementos_t[i - 1];
-        }
-        
-        // cria o modificador no espaco liberado
-        catalogo::elementos_t[posicao].id_item = id_item;
-        catalogo::elementos_t[posicao].id_atributo = id_atributo;
-        catalogo::elementos_t[posicao].valor = valor;
-        
-        catalogo::tamanho_t++;
-    }
-}/*
-essa funcao gerencia a insercao, atualizacao ou remocao de um modificador no vetor contiguo do modo_t
-
-1 - utiliza a busca binaria(buscar_posicao_t) para encontrar o indice alvo
-2 - se o nó ja existir o valor é atualizado
-2.1 - caso o valor seja 0, o nó é removido
-2.2 - se não existir(e o valor for diferente de 0), o nó (modificador) é criado com os elementos
-      posteriores sendo empurrados para trás
-*/
-void catalogo::definir_modificador_t(int id_item, int id_atributo, int valor){
-    
-    int posicao = catalogo::buscar_posicao_t(id_item, id_atributo);
-
-    // checagem segura para confirmar se a celula exata ja existe
-    if (posicao < catalogo::tamanho_t && 
-        catalogo::elementos_t[posicao].id_item == id_item && 
-        catalogo::elementos_t[posicao].id_atributo == id_atributo) {
-        
-        if (valor != 0) {
-            // atualiza o valor
-            catalogo::elementos_t[posicao].valor = valor;
-        } else {
-            // valor == 0 o nó deve ser removido e os posteriores puxados para frente
-            for (int i = posicao; i < catalogo::tamanho_t - 1; i++) {
-                catalogo::elementos_t[i] = catalogo::elementos_t[i + 1];
-            }
-            catalogo::tamanho_t--;
-        }
-    } 
-    // se o elemento nao existir e valor != 0
-    else if (valor != 0) {
-        
-        // checa e resolve limites fisicos de memoria antes de inserir
-        catalogo::redimensionar_t();
-    
-        // empurra os elementos para tras abrindo espaco na posicao alvo
-        for (int i = catalogo::tamanho_t; i > posicao; i--) {
-            catalogo::elementos_t[i] = catalogo::elementos_t[i - 1];
-        }
-        
-        // cria o modificador no espaco liberado
-        catalogo::elementos_t[posicao].id_item = id_item;
-        catalogo::elementos_t[posicao].id_atributo = id_atributo;
-        catalogo::elementos_t[posicao].valor = valor;
-        
-        catalogo::tamanho_t++;
-    }
-}/*
-essa funcao gerencia a insercao, atualizacao ou remocao de um modificador no vetor contiguo do modo_t
-
-1 - utiliza a busca binaria(buscar_posicao_t) para encontrar o indice alvo
-2 - se o nó ja existir o valor é atualizado
-2.1 - caso o valor seja 0, o nó é removido
-2.2 - se não existir(e o valor for diferente de 0), o nó (modificador) é criado com os elementos
-      posteriores sendo empurrados para trás
-*/
-void catalogo::definir_modificador_t(int id_item, int id_atributo, int valor){
-    
-    int posicao = catalogo::buscar_posicao_t(id_item, id_atributo);
-
-    // checagem segura para confirmar se a celula exata ja existe
-    if (posicao < catalogo::tamanho_t && 
-        catalogo::elementos_t[posicao].id_item == id_item && 
-        catalogo::elementos_t[posicao].id_atributo == id_atributo) {
-        
-        if (valor != 0) {
-            // atualiza o valor
-            catalogo::elementos_t[posicao].valor = valor;
-        } else {
-            // valor == 0 o nó deve ser removido e os posteriores puxados para frente
-            for (int i = posicao; i < catalogo::tamanho_t - 1; i++) {
-                catalogo::elementos_t[i] = catalogo::elementos_t[i + 1];
-            }
-            catalogo::tamanho_t--;
-        }
-    } 
-    // se o elemento nao existir e valor != 0
-    else if (valor != 0) {
-        
-        // checa e resolve limites fisicos de memoria antes de inserir
-        catalogo::redimensionar_t();
-    
-        // empurra os elementos para tras abrindo espaco na posicao alvo
-        for (int i = catalogo::tamanho_t; i > posicao; i--) {
-            catalogo::elementos_t[i] = catalogo::elementos_t[i - 1];
-        }
-        
-        // cria o modificador no espaco liberado
-        catalogo::elementos_t[posicao].id_item = id_item;
-        catalogo::elementos_t[posicao].id_atributo = id_atributo;
-        catalogo::elementos_t[posicao].valor = valor;
-        
-        catalogo::tamanho_t++;
-    }
-}/*
-essa funcao gerencia a insercao, atualizacao ou remocao de um modificador no vetor contiguo do modo_t
-
-1 - utiliza a busca binaria(buscar_posicao_t) para encontrar o indice alvo
-2 - se o nó ja existir o valor é atualizado
-2.1 - caso o valor seja 0, o nó é removido
-2.2 - se não existir(e o valor for diferente de 0), o nó (modificador) é criado com os elementos
-      posteriores sendo empurrados para trás
-*/
-void catalogo::definir_modificador_t(int id_item, int id_atributo, int valor){
-    
     //busca a posicao do modificador
     int posicao = catalogo::buscar_posicao_t(id_item, id_atributo);
 
@@ -309,4 +168,99 @@ void catalogo::definir_modificador_t(int id_item, int id_atributo, int valor){
         
         catalogo::tamanho_t++;
     }
+}
+
+
+int catalogo::obter_modificador_t(int id_item, int id_atributo) const{
+
+    int posicao = catalogo::buscar_posicao_t(id_item, id_atributo);
+
+    /*
+    verifica se a posicao nao é invalida (tamanho_t), 
+    se o vetor nao é nulo (tamanho_t > posicao >= 0)
+    e se ja tem um modificador com tal id e atributo   
+    */
+    if (posicao < catalogo::tamanho_t &&
+        catalogo::elementos_t[posicao].id_item == id_item && 
+        catalogo::elementos_t[posicao].id_atributo == id_atributo)
+    {
+        return catalogo::elementos_t[posicao].valor;
+    } else {
+        return 0;
+    }
+}
+
+
+/*
+busca na linha (id_item) o nó anterior àquele que possui o id_atributo procurado.
+como a lista é ordenada pelo id_atributo, a busca para ao encontrar um valor maior ou igual.
+retorna o ponteiro para o nó cujo next é o modificador procurado,
+ou nullptr caso o alvo seja a própria cabeça.
+*/
+node_l* catalogo::buscar_anterior_linha_l(int id_item, int id_atributo) const{
+    
+    //acessa a linha correta
+    node_l* ponteiro_aux = catalogo::cabeca_linhas[id_item];
+
+    //celula vazia ou a propria cabeca ja e o alvo/passou do alvo
+    if(ponteiro_aux == nullptr || ponteiro_aux->id_atributo >= id_atributo){
+        return nullptr;
+    }
+
+    //caminhar parando no anterior ao alvo
+    while (ponteiro_aux->next_atributo != nullptr && 
+           ponteiro_aux->next_atributo->id_atributo < id_atributo)
+    {
+        ponteiro_aux = ponteiro_aux->next_atributo;
+    }
+    
+    //retorna o ponteiro que antecede aquele que procuramos
+    return ponteiro_aux;
+}
+
+
+/*
+busca na coluna (por id_atributo) o nó anterior àquele que possui o id_item procurado.
+como a lista é ordenada pelo id_item, a busca para ao encontrar um valor maior ou igual.
+retorna o ponteiro para o nó anterior, 
+ou nullptr caso o alvo seja a própria cabeça.
+*/
+node_l* catalogo::buscar_anterior_coluna_l(int id_item, int id_atributo) const{
+    
+    // 1. acessa a coluna correta
+    node_l* ponteiro_aux = catalogo::cabeca_colunas[id_atributo];
+
+    // 2. e 3. celula vazia ou a propria cabeca ja e o alvo/passou do alvo
+    if(ponteiro_aux == nullptr || ponteiro_aux->id_item >= id_item){
+        return nullptr;
+    }
+
+    // 4. caminhar parando no anterior ao alvo
+    while (ponteiro_aux->next_item != nullptr && 
+           ponteiro_aux->next_item->id_item < id_item)
+    {
+        ponteiro_aux = ponteiro_aux->next_item;
+    }
+    
+    // 5. retorna o ponteiro que antecede aquele que procuramos
+    return ponteiro_aux;
+}
+
+
+/*
+responde uma consulta direta do modo L, 
+dizendo qual e o valor do modificador para uma determinada combinação de item e atributo
+
+
+*/
+void catalogo::definir_modificador_l(int id_item, int id_atributo, int valor){
+
+    node_l* ponteiro_aux = catalogo::buscar_anterior_coluna_l(id_item, id_atributo);
+    //se a celula nao existe retorna 0
+    if ()
+    {
+        /* code */
+    }
+    
+
 }
