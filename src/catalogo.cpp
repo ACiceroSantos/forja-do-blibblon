@@ -227,40 +227,281 @@ ou nullptr caso o alvo seja a própria cabeça.
 */
 node_l* catalogo::buscar_anterior_coluna_l(int id_item, int id_atributo) const{
     
-    // 1. acessa a coluna correta
+    //acessa a coluna correta
     node_l* ponteiro_aux = catalogo::cabeca_colunas[id_atributo];
 
-    // 2. e 3. celula vazia ou a propria cabeca ja e o alvo/passou do alvo
+    //celula vazia ou a propria cabeca ja e o alvo/passou do alvo
     if(ponteiro_aux == nullptr || ponteiro_aux->id_item >= id_item){
         return nullptr;
     }
 
-    // 4. caminhar parando no anterior ao alvo
+    //caminhar parando no anterior ao alvo
     while (ponteiro_aux->next_item != nullptr && 
            ponteiro_aux->next_item->id_item < id_item)
     {
         ponteiro_aux = ponteiro_aux->next_item;
     }
     
-    // 5. retorna o ponteiro que antecede aquele que procuramos
+    //retorna o ponteiro que antecede aquele que procuramos
     return ponteiro_aux;
 }
 
 
 /*
-responde uma consulta direta do modo L, 
-dizendo qual e o valor do modificador para uma determinada combinação de item e atributo
+obtem o valor do modificador para o id_item e id_atributo no modo_l.
+utiliza a busca do nó anterior na linha e trata com seguranca o acesso a cabeca e ponteiros nulos.
+retorna o valor gravado ou 0 caso a celula nao exista.
+*/
+int catalogo::obter_modificador_l(int id_item, int id_atributo) const{
 
+    node_l* node_aux = catalogo::buscar_anterior_linha_l(id_item, id_atributo);
+    node_l* node_alvo = nullptr;
+
+    // se o anterior for nulo, a celula alvo e a propria cabeca da linha
+    if (node_aux == nullptr) {
+        node_alvo = catalogo::cabeca_linhas[id_item];
+    } else {
+        node_alvo = node_aux->next_atributo;
+    }
+
+    // verifica se o no alvo existe e se e exatamente a celula procurada
+    if (node_alvo != nullptr && node_alvo->id_atributo == id_atributo) {
+        return node_alvo->valor;
+    }
+
+    return 0;
+}
+
+
+/*
+funcao responsavel por atualizar, inserir ou remover um nó da Matriz Esparsa do Modo_L.
+cada célula/nó/modificador pertence a duas listas encadeadas simultaneamente,
+a lista da linha next_item
+e a lista da coluna next_atributo
+
+se o nó já existe e o valor dado != 0, apenas localiza-se o nó e altera o seu valor.
+se o nó já existe e o valor dado == 0, remove-se o nó.
+
+se o nó NÃO existe e o valor != 0, o nó é criado e alocado na memoria,
+ em seguida ele é encadeado em ambas as listas encadeadas
+ com o uso da funcao buscar_anterior_linha/coluna_l
+se o nó NÃO existe e o valor == 0, nada é feito.
 
 */
+
 void catalogo::definir_modificador_l(int id_item, int id_atributo, int valor){
 
-    node_l* ponteiro_aux = catalogo::buscar_anterior_coluna_l(id_item, id_atributo);
-    //se a celula nao existe retorna 0
-    if ()
+    node_l* node_alvo = nullptr;
+    
+    node_l* node_anterior_linha = buscar_anterior_linha_l(id_item, id_atributo);
+    node_l* node_anterior_coluna = buscar_anterior_coluna_l(id_item, id_atributo);
+
+    if (node_anterior_linha == nullptr)
     {
-        /* code */
+        node_alvo = catalogo::cabeca_linhas[id_item];
+    } else {
+        node_alvo = node_anterior_linha->next_atributo;
     }
     
+
+    //se o nó existe
+    if (node_alvo != nullptr &&
+        node_alvo->id_atributo == id_atributo)
+    {
+        //se valor == 0
+        if (valor == 0)
+        {
+            //remove o nó
+
+            //se a linha anterior for nula, entao o node_alvo é a cabeca da linha
+            if (node_anterior_linha == nullptr) {
+
+                //passa a cabeca pro proximo
+                catalogo::cabeca_linhas[id_item] = node_alvo->next_atributo;
+            } else {
+
+                //se nao for nula desconecta o nó
+                node_anterior_linha->next_atributo = node_alvo->next_atributo;
+            }
+
+            //desconecta da coluna
+            if (node_anterior_coluna == nullptr) {
+
+                catalogo::cabeca_colunas[id_atributo] = node_alvo->next_item;
+            } else {
+
+                node_anterior_coluna->next_item = node_alvo->next_item;
+            }
+
+            //libera a memoria do nó desvinculado
+            delete node_alvo;
+        }
+        //se valor != 0
+        else
+        {
+            node_alvo->valor = valor;
+        }
+    } 
+    //se o nó nao existe
+    else{
+        //se valor == 0
+        if (valor == 0)
+        {
+           //nao faz nada
+        }
+        //se valor != 0 
+        else
+        {
+            //insercao: cria o nó
+            node_alvo = new node_l;
+            node_alvo->id_atributo = id_atributo;
+            node_alvo->id_item = id_item;
+            node_alvo->valor = valor;
+
+            // encadeia na linha (horizontal)
+            if (node_anterior_linha == nullptr)
+            {
+                node_alvo->next_atributo = catalogo::cabeca_linhas[id_item];
+                catalogo::cabeca_linhas[id_item] = node_alvo;
+                
+            }else{
+                node_alvo->next_atributo = node_anterior_linha->next_atributo;
+                node_anterior_linha->next_atributo = node_alvo;
+            }
+            
+            // encadeia na coluna (vertical)
+            if (node_anterior_coluna == nullptr)
+            {
+                node_alvo->next_item = catalogo::cabeca_colunas[id_atributo];
+                catalogo::cabeca_colunas[id_atributo] = node_alvo;
+            }else{
+                node_alvo->next_item = node_anterior_coluna->next_item;
+                node_anterior_coluna->next_item = node_alvo;
+            }
+
+        }
+    }
+}
+
+
+
+
+/*
+libera toda a memoria alocada pelas celulas do modo l navegando pelas linhas.
+apos desalocar os nos, ajusta os ponteiros dos vetores de cabeca para nullptr.
+*/
+void catalogo::limpar_modo_l(){
+
+    node_l* node_auxiliar = nullptr;
+    node_l* next_auxiliar = nullptr;
+
+    // percorre todas as linhas desalocando no por no
+    for (int i = 0; i < catalogo::total_itens; i++) {
+        node_auxiliar = catalogo::cabeca_linhas[i];
+
+        while (node_auxiliar != nullptr) {
+            // guarda o proximo no antes de desalocar o atual
+            next_auxiliar = node_auxiliar->next_atributo;
+            delete node_auxiliar;
+            node_auxiliar = next_auxiliar;
+        }
+
+        // reseta a cabeca da linha limpa
+        catalogo::cabeca_linhas[i] = nullptr;
+    }
+
+    // reseta as cabecas das colunas para evitar ponteiros selvagens
+    for (int j = 0; j < catalogo::total_atributos; j++) {
+        catalogo::cabeca_colunas[j] = nullptr;
+    }
+}
+
+
+/*
+libera a memoria alocada pelo vetor dinamico do modo t.
+anula o ponteiro elementos_t e reseta o tamanho e a capacidade para zero.
+*/
+void catalogo::limpar_modo_t(){
+
+    if (catalogo::elementos_t != nullptr)
+    {
+        delete[] catalogo::elementos_t;
+        catalogo::elementos_t = nullptr;
+    }
+    
+    catalogo::tamanho_t = 0;
+    catalogo::capacidade_t = 0;
+}
+
+
+/*
+construtor da classe catalogo.
+inicializa a representacao ativa com o modo informado e reseta os ponteiros
+e variaveis de controle de ambos os modos (t e l).
+*/
+catalogo::catalogo(bool modo_inicial) {
+
+    modo_atual = modo_inicial;
+    
+    catalogo::total_atributos = 0;
+    catalogo::total_itens = 0;
+
+    // inicializacao do modo t
+    catalogo::elementos_t = nullptr;
+    catalogo::capacidade_t = 0;
+    catalogo::tamanho_t = 0;
+
+    // inicializacao do modo l
+    catalogo::cabeca_colunas = nullptr;
+    catalogo::cabeca_linhas = nullptr;
+}
+
+/*
+destrutor da classe catalogo.
+libera todas as celulas alocadas em ambos os modos e desaloca os vetores
+de ponteiros de cabecas de linha e coluna.
+*/
+catalogo::~catalogo() {
+    
+    // desaloca os nos armazenados nas estruturas
+    catalogo::limpar_modo_l();
+    catalogo::limpar_modo_t();
+
+    // libera a memoria dos vetores primarios de ponteiros das cabecas
+    delete[] catalogo::cabeca_linhas;
+    delete[] catalogo::cabeca_colunas;
+}
+
+
+/*
+ataualiza o tamanho da matriz com a quantidade de linhas e colunas dadas
+modo T:
+muda as variaveis
+modo L:
+realoca vetores cabeca com mais espaco
+
+*/
+void catalogo::redimensionar_dimensoes(int novos_itens, int novos_atributos){
+
+    catalogo::total_atributos += novos_atributos;
+    catalogo::total_itens += novos_itens;
+
+    //redimensionando Modo L
+    node_l** nova_cabeca_linha[total_itens];
+    node_l** nova_cabeca_coluna[total_atributos];
+    
+    //se o numero de itens aumentou
+    if(novos_itens > 0){
+        
+    }
+    //se o numero de atributos aumentou
+    if (novos_atributos > 0)
+    {
+        
+    }
+    
+
+    
+
 
 }

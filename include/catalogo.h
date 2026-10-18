@@ -102,24 +102,60 @@ private:
 
     // --- metodos privados auxiliares do modo l ---
 
-    // encontra o nó anterior a uma coluna dentro de uma linha especifica no modo l
+    /*
+    busca na linha (id_item) o nó anterior àquele que possui o id_atributo procurado.
+    como a lista é ordenada pelo id_atributo, a busca para ao encontrar um valor maior ou igual.
+    retorna o ponteiro para o nó cujo next é o modificador procurado,
+    ou nullptr caso o alvo seja a própria cabeça.
+    */
     node_l* buscar_anterior_linha_l(int id_item, int id_atributo) const;
 
-    // encontra o nó anterior a uma linha dentro de uma coluna especifica no modo l
+
+    /*
+    busca na coluna (por id_atributo) o nó anterior àquele que possui o id_item procurado.
+    como a lista é ordenada pelo id_item, a busca para ao encontrar um valor maior ou igual.
+    retorna o ponteiro para o nó anterior, 
+    ou nullptr caso o alvo seja a própria cabeça.
+    */
     node_l* buscar_anterior_coluna_l(int id_item, int id_atributo) const;
 
-    // insere, altera ou remove um nó das listas encadeadas de linha e coluna no modo l
+
+    /*
+    funcao responsavel por atualizar, inserir ou remover um nó da Matriz Esparsa do Modo_L.
+    cada célula/nó/modificador pertence a duas listas encadeadas simultaneamente,
+    a lista da linha next_item
+    e a lista da coluna next_atributo
+
+    se o nó já existe e o valor dado != 0, apenas localiza-se o nó e altera o seu valor.
+    se o nó já existe e o valor dado == 0, remove-se o nó.
+
+    se o nó NÃO existe e o valor != 0, o nó é criado e alocado na memoria,
+    em seguida ele é encadeado em ambas as listas encadeadas
+    com o uso da funcao buscar_anterior_linha/coluna_l
+    se o nó NÃO existe e o valor == 0, nada é feito.
+
+    */
     void definir_modificador_l(int id_item, int id_atributo, int valor);
 
-    // busca e retorna o valor de um modificador no modo l (retorna 0 se nao existir)
+    /*
+    obtem o valor do modificador para o id_item e id_atributo no modo_l.
+    utiliza a busca do nó anterior na linha e trata com seguranca o acesso a cabeca e ponteiros nulos.
+    retorna o valor gravado ou 0 caso a celula nao exista.
+    */
     int obter_modificador_l(int id_item, int id_atributo) const;
 
     // --- metodos privados de migracao e gerenciamento ---
 
-    // libera toda a memoria alocada pelas celulas do modo l
+    /*
+    libera toda a memoria alocada pelas celulas do modo l navegando pelas linhas.
+    apos desalocar os nos, ajusta os ponteiros dos vetores de cabeca para nullptr.
+    */
     void limpar_modo_l();
 
-    // libera a memoria alocada pelo vetor do modo t
+    /*
+    libera a memoria alocada pelo vetor dinamico do modo t.
+    anula o ponteiro elementos_t e reseta o tamanho e a capacidade para zero.
+    */
     void limpar_modo_t();
 
 public:
