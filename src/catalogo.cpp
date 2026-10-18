@@ -1,5 +1,6 @@
-#include "catalogo.h"
 #include <iostream>
+#include "catalogo.h"
+
 using namespace std;
 
 /*
@@ -246,7 +247,6 @@ node_l* catalogo::buscar_anterior_coluna_l(int id_item, int id_atributo) const{
     return ponteiro_aux;
 }
 
-
 /*
 obtem o valor do modificador para o id_item e id_atributo no modo_l.
 utiliza a busca do nó anterior na linha e trata com seguranca o acesso a cabeca e ponteiros nulos.
@@ -492,7 +492,6 @@ void catalogo::redimensionar_dimensoes(int novos_itens, int novos_atributos){
     
     //se o numero de itens aumentou
     if(novos_itens > 0){
-        
     }
     //se o numero de atributos aumentou
     if (novos_atributos > 0)
