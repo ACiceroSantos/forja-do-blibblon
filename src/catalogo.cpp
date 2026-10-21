@@ -474,33 +474,288 @@ catalogo::~catalogo() {
 
 
 /*
-ataualiza o tamanho da matriz com a quantidade de linhas e colunas dadas
-modo T:
-muda as variaveis
-modo L:
-realoca vetores cabeca com mais espaco
-
+atualiza o tamanho da matriz (linhas e colunas) conforme novos itens e atributos sao inseridos.
+no modo l, realoca os vetores de ponteiros de cabeceira preservando os dados anteriores.
 */
-void catalogo::redimensionar_dimensoes(int novos_itens, int novos_atributos){
+void catalogo::redimensionar_dimensoes(int novos_itens, int novos_atributos) {
 
-    catalogo::total_atributos += novos_atributos;
-    catalogo::total_itens += novos_itens;
-
-    //redimensionando Modo L
-    node_l** nova_cabeca_linha[total_itens];
-    node_l** nova_cabeca_coluna[total_atributos];
-    
-    //se o numero de itens aumentou
-    if(novos_itens > 0){
-    }
-    //se o numero de atributos aumentou
-    if (novos_atributos > 0)
-    {
+    // realocacao do vetor de cabecas de linha (itens) no modo L
+    if (novos_itens > catalogo::total_itens) {
         
+        // aloca dinamicamente o novo vetor de ponteiros
+        node_l** nova_cabeca_linhas = new node_l*[novos_itens];
+
+        // copia as cabecas das linhas ja existentes
+        for (int i = 0; i < catalogo::total_itens; i++) {
+            nova_cabeca_linhas[i] = catalogo::cabeca_linhas[i];
+        }
+
+        // inicializa as posicoes de linha vazias que sobraram com nullptr
+        for (int i = catalogo::total_itens; i < novos_itens; i++) {
+            nova_cabeca_linhas[i] = nullptr;
+        }
+
+        // libera o vetor antigo da memoria
+        delete[] catalogo::cabeca_linhas;
+
+        // atualiza o ponteiro do catalogo
+        catalogo::cabeca_linhas = nova_cabeca_linhas;
     }
-    
 
-    
+    // realocacao do vetor de cabecas de coluna (atributos) no modo l
+    if (novos_atributos > catalogo::total_atributos) {
+
+        // aloca dinamicamente o novo vetor de ponteiros
+        node_l** nova_cabeca_colunas = new node_l*[novos_atributos];
+
+        // copia as cabecas das colunas ja existentes
+        for (int j = 0; j < catalogo::total_atributos; j++) {
+            nova_cabeca_colunas[j] = catalogo::cabeca_colunas[j];
+        }
+
+        // inicializa as posicoes de coluna vazias que sobraram com nullptr
+        for (int j = catalogo::total_atributos; j < novos_atributos; j++) {
+            nova_cabeca_colunas[j] = nullptr;
+        }
+
+        // libera o vetor antigo da memoria
+        delete[] catalogo::cabeca_colunas;
+
+        // atualiza o ponteiro do catalogo
+        catalogo::cabeca_colunas = nova_cabeca_colunas;
+    }
+
+    // atualiza os valores de total de itens e atributos
+    catalogo::total_itens = novos_itens;
+    catalogo::total_atributos = novos_atributos;
+}
 
 
+
+/*
+alterna o modo de armazenamento ativo (modo l <-> modo t) sem perda de dados.
+percorre a estrutura atual inserindo os dados no novo modo e limpa a memoria da antiga.
+*/
+void catalogo::alternar_modo(bool novo_modo) {
+
+    // se o modo solicitado ja for o atual, nenhuma acao e necessária
+    if (catalogo::modo_atual == novo_modo) {
+        return;
+    }
+
+    // alternancia do modo l (1) para o modo t (0)
+    if (catalogo::modo_atual == 1 && novo_modo == 0) {
+        
+        // atualiza o modo atual
+        catalogo::modo_atual = 0;
+
+        node_l* node_auxiliar = nullptr;
+
+        // percorre todas as linhas da lista cruzada do modo l
+        for (int i = 0; i < catalogo::total_itens; i++) {
+            node_auxiliar = catalogo::cabeca_linhas[i];
+
+            // insere cada nó da linha no vetor de tripletas
+            while (node_auxiliar != nullptr) {
+                catalogo::definir_modificador_t(node_auxiliar->id_item, 
+                                                node_auxiliar->id_atributo, 
+                                                node_auxiliar->valor);
+                node_auxiliar = node_auxiliar->next_atributo;
+            }
+        }
+
+        // libera a memoria da estrutura antiga do modo l
+        catalogo::limpar_modo_l();
+    }
+    // alternancia do modo t (0) para o modo l (1)
+    else if (catalogo::modo_atual == 0 && novo_modo == 1) {
+
+        // atualiza o modo antes de fazer a mudanca
+        catalogo::modo_atual = 1;
+
+        // percorre o vetor contiguo e insere cada tripleta na matriz esparsa
+        for (int k = 0; k < catalogo::tamanho_t; k++) {
+            catalogo::definir_modificador_l(catalogo::elementos_t[k].id_item, 
+                                            catalogo::elementos_t[k].id_atributo, 
+                                            catalogo::elementos_t[k].valor);
+        }
+
+        // libera a memoria do vetor do modo t
+        catalogo::limpar_modo_t();
+    }
+}
+
+
+/*
+insere, altera ou remove um modificador na matriz (comando m).
+redireciona a operacao para a funcao interna do modo ativo no momento.
+*/
+void catalogo::definir_modificador(int id_item, int id_atributo, int valor) {
+
+    // para o modo t (0)
+    if (catalogo::modo_atual == 0) {
+        catalogo::definir_modificador_t(id_item, id_atributo, valor);
+    }
+    // para o modo l (1)
+    else {
+        catalogo::definir_modificador_l(id_item, id_atributo, valor);
+    }
+}
+
+
+/*
+consulta e retorna o valor de um modificador para um determinado item e atributo.
+redireciona a consulta para a funcao especifica do modo ativo (t ou l).
+retorna 0 caso o modificador nao esteja definido na matriz esparsa.
+*/
+int catalogo::obter_modificador(int id_item, int id_atributo) const {
+
+    // roteamento de consulta para o modo t (0)
+    if (catalogo::modo_atual == 0) {
+        return catalogo::obter_modificador_t(id_item, id_atributo);
+    }
+    // roteamento de consulta para o modo l (1)
+    else {
+        return catalogo::obter_modificador_l(id_item, id_atributo);
+    }
+}
+
+
+/*
+imprime todos os atributos modificados por um item em ordem crescente de id_atributo (comando li).
+se o item nao modificar nenhum atributo, imprime VAZIO conforme a especificacao.
+*/
+void catalogo::listar_item(int id_item, const char* nome_item) const {
+    cout << "LI " << nome_item;
+
+    bool possui_modificadores = false;
+
+    // consulta via modo t
+    if (catalogo::modo_atual == 0) {
+        for (int k = 0; k < catalogo::tamanho_t; k++) {
+            if (catalogo::elementos_t[k].id_item == id_item) {
+                cout << " " << catalogo::elementos_t[k].id_atributo 
+                     << " " << catalogo::elementos_t[k].valor;
+                possui_modificadores = true;
+            }
+        }
+    } 
+    // consulta via modo l
+    else {
+        node_l* node_auxiliar = catalogo::cabeca_linhas[id_item];
+        while (node_auxiliar != nullptr) {
+            cout << " " << node_auxiliar->id_atributo 
+                 << " " << node_auxiliar->valor;
+            possui_modificadores = true;
+            node_auxiliar = node_auxiliar->next_atributo;
+        }
+    }
+
+    if (!possui_modificadores) {
+        cout << " VAZIO";
+    }
+
+    cout << endl;
+}
+
+
+/*
+imprime todos os itens que modificam um atributo especifico em ordem crescente de id_item (comando la).
+se nenhum item modificar o atributo, imprime VAZIO conforme a especificacao.
+*/
+void catalogo::listar_atributo(int id_atributo, const char* nome_atributo) const {
+    cout << "LA " << nome_atributo;
+
+    bool possui_modificadores = false;
+
+    // consulta via modo t
+    if (catalogo::modo_atual == 0) {
+        for (int k = 0; k < catalogo::tamanho_t; k++) {
+            if (catalogo::elementos_t[k].id_atributo == id_atributo) {
+                cout << " " << catalogo::elementos_t[k].id_item 
+                     << " " << catalogo::elementos_t[k].valor;
+                possui_modificadores = true;
+            }
+        }
+    } 
+    // consulta via modo l
+    else {
+        node_l* node_auxiliar = catalogo::cabeca_colunas[id_atributo];
+        while (node_auxiliar != nullptr) {
+            cout << " " << node_auxiliar->id_item 
+                 << " " << node_auxiliar->valor;
+            possui_modificadores = true;
+            node_auxiliar = node_auxiliar->next_item;
+        }
+    }
+
+    if (!possui_modificadores) {
+        cout << " VAZIO";
+    }
+
+    cout << endl;
+}
+
+
+/*
+calcula o produto interno entre a linha do item e a build do aventureiro.
+usado para medir a sinergia na recomendacao.
+multiplica e soma os modificadores do item com os da build.
+*/
+double catalogo::produto_interno_build(int id_item, const int* vetor_build) const {
+    double produto_interno = 0.0;
+
+    if (vetor_build == nullptr) {
+        return 0.0;
+    }
+
+    // calculo via modo t
+    if (catalogo::modo_atual == 0) {
+        for (int k = 0; k < catalogo::tamanho_t; k++) {
+            if (catalogo::elementos_t[k].id_item == id_item) {
+                int atrib = catalogo::elementos_t[k].id_atributo;
+                produto_interno += static_cast<double>(catalogo::elementos_t[k].valor) * vetor_build[atrib];
+            }
+        }
+    } 
+    // calculo via modo l
+    else {
+        node_l* node_auxiliar = catalogo::cabeca_linhas[id_item];
+        while (node_auxiliar != nullptr) {
+            int atrib = node_auxiliar->id_atributo;
+            produto_interno += static_cast<double>(node_auxiliar->valor) * vetor_build[atrib];
+            node_auxiliar = node_auxiliar->next_atributo;
+        }
+    }
+
+    return produto_interno;
+}
+
+
+/*
+soma todos os modificadores nao nulos concedidos por um item.
+usado para calcular o poder e a media do equilibrio.
+percorre a linha acumulando o valor de cada atributo.
+*/
+int catalogo::somar_modificadores_item(int id_item) const {
+    int soma_modificadores = 0;
+
+    // calculo via modo t
+    if (catalogo::modo_atual == 0) {
+        for (int k = 0; k < catalogo::tamanho_t; k++) {
+            if (catalogo::elementos_t[k].id_item == id_item) {
+                soma_modificadores += catalogo::elementos_t[k].valor;
+            }
+        }
+    } 
+    // calculo via modo l
+    else {
+        node_l* node_auxiliar = catalogo::cabeca_linhas[id_item];
+        while (node_auxiliar != nullptr) {
+            soma_modificadores += node_auxiliar->valor;
+            node_auxiliar = node_auxiliar->next_atributo;
+        }
+    }
+
+    return soma_modificadores;
 }
