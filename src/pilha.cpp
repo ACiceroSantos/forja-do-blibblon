@@ -62,9 +62,12 @@ pilha::pilha(int id_av){
 
 //destrutor
 pilha::~pilha(){
-    pilha::desempilhar(pilha::tamanho);
+    int id_removido = 0;
+    while (!pilha::vazia())
+    {
+        pilha::desempilhar(id_removido);
+    }
 }
-
 
 /*
 * empilhar(id_item)
@@ -98,48 +101,33 @@ void pilha::empilhar(int id_item){
 * retorna a quantidade removida
 */
 
-int pilha::desempilhar(int quantidade){
-
-    int removidos = 0;
-    node_pilha* node_auxiliar = nullptr;
-
-    //continua removendo itens desde que nao tenha sido esvaziada a quantidade desejada ainda
-    //e a pilha nao está vazia
-    while (removidos < quantidade && !vazia())
-    {
-        node_auxiliar = pilha::top;
-        pilha::top = node_auxiliar->next;
-        delete node_auxiliar;
-        
-        pilha::tamanho--;
-        removidos++;
-    }
+bool pilha::desempilhar(int &id_item_removido){
     
-    return removidos;
+    // se a pilha estiver vazia, nao ha o que desempilhar
+    if (pilha::vazia()) {
+        return false;
+    }
+
+    // ponteiro auxiliar para o no do topo atual
+    node_pilha* node_auxiliar = pilha::top;
+
+    // guarda o id do item que esta sendo removido
+    id_item_removido = node_auxiliar->id_item;
+
+    // avanca o topo para o proximo item da pilha
+    pilha::top = node_auxiliar->next;
+
+    // libera a memoria do no desequipado
+    delete node_auxiliar;
+
+    // decrementa o tamanho total de itens equipados
+    pilha::tamanho--;
+
+    return true;
 }
 
-
-/*
-* comando LH <id_aventureiro>
-* saida: LH <id_aventureiro> <item_topo> <item_2> ... <item_base>
-* ou LH <id_aventureiro> se a build estiver vazia
-*/
-
-void pilha::listar_build() const{
-
-    //auxiliar
-    node_pilha* node_auxiliar = pilha::top;
-    
-    cout << "LH " << pilha::id_aventureiro;
-    
-    while (node_auxiliar != nullptr)
-    {
-        cout << " " << node_auxiliar->id_item;
-
-        node_auxiliar = node_auxiliar->next;
-    }
-
-    cout << endl;
+node_pilha* pilha::get_top() const {
+    return pilha::top;
 }
 
 //metodos auxiliares

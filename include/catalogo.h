@@ -177,11 +177,11 @@ public:
     // consulta o valor de um modificador de um item em um atributo especifico
     int obter_modificador(int id_item, int id_atributo) const;
 
-    // imprime todos os atributos e valores de um item especifico em ordem crescente de atributo (comando li)
-    void listar_item(int id_item, const char* nome_item) const;
+    // imprime todos os atributos e valores de um item especifico
+    void listar_item(int id_item, const std::string& nome_item) const;
 
-    // imprime todos os itens e valores de um atributo especifico em ordem crescente de item (comando la)
-    void listar_atributo(int id_atributo, const char* nome_atributo) const;
+    // imprime todos os itens e valores de um atributo especifico
+    void listar_atributo(int id_atributo, const std::string& nome_atributo) const;
 
     // calcula o produto interno entre a linha de um item e o vetor de build de um aventureiro (usado na sinergia)
     double produto_interno_build(int id_item, const int* vetor_build) const;

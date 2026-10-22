@@ -63,7 +63,6 @@ class pilha{
         int tamanho;
 
     public:
-
         //definir = 0 como valor padrao evita erros caso seja necessario utilizaro construtor padrao sem parametros
         //instanciando um vetor/matriz de pilhas por exemplo
         pilha(int id_av = 0);
@@ -74,15 +73,17 @@ class pilha{
         //saida: encomenda_<turno> <id_aventureiro> <id_item>
         void empilhar(int id_item);
 
-        //comando D <id_aventureiro> <quantidade>
-        //saida: D <id_aventureiro> <quantidade_efetivamente_removida>
-        //retorna a quantidade removida
-        int desempilhar(int quantidade);
+        // remove o item do topo da build (comando d)
+        // preenche o id_item_removido e retorna true se desequipou, ou false se a build estava vazia
+        bool desempilhar(int& id_item_removido);
 
         //comando LH <id_aventureiro>
         //saida: LH <id_aventureiro> <item_topo> <item_2> ... <item_base>
         // ou LH <id_aventureiro> se a build estiver vazia
         void listar_build() const;
+
+        // retorna o ponteiro para o nó do topo sem remover
+        node_pilha* get_top() const;
 
         bool vazia() const;
 

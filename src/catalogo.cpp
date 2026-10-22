@@ -625,17 +625,19 @@ int catalogo::obter_modificador(int id_item, int id_atributo) const {
 imprime todos os atributos modificados por um item em ordem crescente de id_atributo (comando li).
 se o item nao modificar nenhum atributo, imprime VAZIO conforme a especificacao.
 */
-void catalogo::listar_item(int id_item, const char* nome_item) const {
+void catalogo::listar_item(int id_item, const std::string& nome_item) const {
     cout << "LI " << nome_item;
 
     bool possui_modificadores = false;
+    int contador = 1; // CORREÇÃO: contador para atributo_1, atributo_2...
 
     // consulta via modo t
     if (catalogo::modo_atual == 0) {
         for (int k = 0; k < catalogo::tamanho_t; k++) {
             if (catalogo::elementos_t[k].id_item == id_item) {
-                cout << " " << catalogo::elementos_t[k].id_atributo 
+                cout << " atributo_" << contador << " " << catalogo::elementos_t[k].id_atributo 
                      << " " << catalogo::elementos_t[k].valor;
+                contador++;
                 possui_modificadores = true;
             }
         }
@@ -644,8 +646,9 @@ void catalogo::listar_item(int id_item, const char* nome_item) const {
     else {
         node_l* node_auxiliar = catalogo::cabeca_linhas[id_item];
         while (node_auxiliar != nullptr) {
-            cout << " " << node_auxiliar->id_atributo 
+            cout << " atributo_" << contador << " " << node_auxiliar->id_atributo 
                  << " " << node_auxiliar->valor;
+            contador++;
             possui_modificadores = true;
             node_auxiliar = node_auxiliar->next_atributo;
         }
@@ -663,17 +666,19 @@ void catalogo::listar_item(int id_item, const char* nome_item) const {
 imprime todos os itens que modificam um atributo especifico em ordem crescente de id_item (comando la).
 se nenhum item modificar o atributo, imprime VAZIO conforme a especificacao.
 */
-void catalogo::listar_atributo(int id_atributo, const char* nome_atributo) const {
+void catalogo::listar_atributo(int id_atributo, const std::string& nome_atributo) const {
     cout << "LA " << nome_atributo;
 
     bool possui_modificadores = false;
+    int contador = 1; // CORREÇÃO: contador para item_1, item_2...
 
     // consulta via modo t
     if (catalogo::modo_atual == 0) {
         for (int k = 0; k < catalogo::tamanho_t; k++) {
             if (catalogo::elementos_t[k].id_atributo == id_atributo) {
-                cout << " " << catalogo::elementos_t[k].id_item 
+                cout << " item_" << contador << " " << catalogo::elementos_t[k].id_item 
                      << " " << catalogo::elementos_t[k].valor;
+                contador++;
                 possui_modificadores = true;
             }
         }
@@ -682,8 +687,9 @@ void catalogo::listar_atributo(int id_atributo, const char* nome_atributo) const
     else {
         node_l* node_auxiliar = catalogo::cabeca_colunas[id_atributo];
         while (node_auxiliar != nullptr) {
-            cout << " " << node_auxiliar->id_item 
+            cout << " item_" << contador << " " << node_auxiliar->id_item 
                  << " " << node_auxiliar->valor;
+            contador++;
             possui_modificadores = true;
             node_auxiliar = node_auxiliar->next_item;
         }
@@ -695,7 +701,6 @@ void catalogo::listar_atributo(int id_atributo, const char* nome_atributo) const
 
     cout << endl;
 }
-
 
 /*
 calcula o produto interno entre a linha do item e a build do aventureiro.
